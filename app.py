@@ -1,5 +1,5 @@
 # Flask app with Upload functionality
-from flask import Flasks, render_template, request, redirect
+from flask import Flask, render_template, request, redirect
 import pandas as pd
 import os
 
