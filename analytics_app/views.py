@@ -7,6 +7,7 @@ import os, pandas as pd, numpy as np
 from django.http import HttpResponse
 from .forms import UploadFileForm  # Import the UploadFileForm from forms.py
 from .privacy_utils import anonymize_data
+from .viz_utils import compare_datasets
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -79,4 +80,59 @@ def dashboard(request):
                         'table': preview
                    })
 
-
+# Visualization and Comparison View
+@login_required
+def visualize(request):
+    filepath = request.session.get('uploaded_file_path')
+    if not filepath or not os.path.exists(filepath):
+        return redirect('upload')
+    
+    # Read dataset
+    try:
+        # Try to determine if the file is CSV, Excel, etc.
+        if filepath.endswith('.csv'):
+            df = pd.read_csv(filepath)
+        elif filepath.endswith(('.xls', '.xlsx')):
+            df = pd.read_excel(filepath)
+        else:
+            # Default to CSV if unsure
+            df = pd.read_csv(filepath)
+            
+        # Basic data cleaning
+        # Fill missing values in numeric columns with mean, in categorical with most frequent
+        for col in df.columns:
+            if pd.api.types.is_numeric_dtype(df[col]):
+                df[col] = df[col].fillna(df[col].mean())
+            else:
+                df[col] = df[col].fillna(df[col].mode()[0] if not df[col].mode().empty else "Unknown")
+                
+    except Exception as e:
+        return render(request, 'visualize.html', {
+            'viz': {
+                'error': f"Error reading the dataset: {str(e)}",
+                'orig_stats': "",
+                'anon_stats': "",
+                'orig_plots': [],
+                'anon_plots': [],
+                'anonymized_df': ""
+            }
+        })
+    
+    # Generate comparison stats and plots
+    try:
+        comparison = compare_datasets(df, epsilon=1.0)
+        return render(request, 'visualize.html', {'viz': comparison})
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        return render(request, 'visualize.html', {
+            'viz': {
+                'error': f"Error generating visualizations: {str(e)}",
+                'details': error_details,
+                'orig_stats': df.describe().to_html(classes="table table-bordered") if 'df' in locals() else "",
+                'anon_stats': "",
+                'orig_plots': [],
+                'anon_plots': [],
+                'anonymized_df': ""
+            }
+        })
