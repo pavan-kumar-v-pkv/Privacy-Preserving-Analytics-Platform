@@ -1,6 +1,5 @@
-flask
+Django>=4.2
 pandas
 numpy
 plotly
 scikit-learn
-matplotlib
