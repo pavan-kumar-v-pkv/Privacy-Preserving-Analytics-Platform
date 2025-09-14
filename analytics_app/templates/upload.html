@@ -1,7 +1,59 @@
-<h2>Upload Dataset</h2>
-<form action="{% url 'upload' %}" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Upload</button>
-</form>
-<a href="{% url 'logout' %}">Logout</a>
+{% extends 'base.html' %}
+
+{% block title %}Upload Data - Privacy Analytics{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">Upload Dataset</h3>
+            </div>
+            <div class="card-body">
+                <p class="lead mb-4">
+                    Upload your dataset to begin the privacy-preserving analysis. 
+                    We support CSV and Excel files.
+                </p>
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="{{ form.file.id_for_label }}" class="form-label">
+                            Select a file to upload
+                        </label>
+                        {{ form.file }}
+                        <div class="form-text">
+                            {{ form.file.help_text }}
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload & Analyze</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4 class="mb-0">About Privacy Analytics</h4>
+            </div>
+            <div class="card-body">
+                <p>Our privacy-preserving analytics platform helps you:</p>
+                <ul>
+                    <li>Anonymize sensitive data using differential privacy techniques</li>
+                    <li>Visualize your data before and after anonymization</li>
+                    <li>Compare statistical properties to ensure utility is preserved</li>
+                    <li>Generate reports suitable for compliance with privacy regulations</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add Bootstrap form classes to form inputs
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelector('#id_file').classList.add('form-control');
+    });
+</script>
+{% endblock %}
