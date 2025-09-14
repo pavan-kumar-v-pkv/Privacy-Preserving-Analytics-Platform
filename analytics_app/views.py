@@ -3,8 +3,10 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
-import os, pandas as pd
+import os, pandas as pd, numpy as np
+from django.http import HttpResponse
 from .forms import UploadFileForm  # Import the UploadFileForm from forms.py
+from .privacy_utils import anonymize_data
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -52,10 +54,29 @@ def upload_file(request):
         form = UploadFileForm()
     return render(request, 'upload.html', {'form': form})
 
-# Dashboard View
+# Dashboard View: # integrate the privacy utils here
 @login_required
 def dashboard(request):
     filepath = request.session.get('uploaded_file_path')
     if not filepath or not os.path.exists(filepath):
         return redirect('upload')
-    return render(request, 'dashboard.html', {'file': filepath})
+    
+    # Read dataset
+    try:
+        df = pd.read_csv(filepath)
+    except Exception as e:
+        return HttpResponse(f"Error reading uploaded file. Ensure it's a valid CSV.")
+    
+    # Anonymize dataset
+    anonymized_df = anonymize_data(df, epsilon=1.0)
+
+    # Show only top 10 rows for preview
+    preview = anonymized_df.head(10).to_html(classes='table table-bordered', index=False)
+
+    return render(request, 'dashboard.html', 
+                  {
+                        'file': filepath, 
+                        'table': preview
+                   })
+
+
