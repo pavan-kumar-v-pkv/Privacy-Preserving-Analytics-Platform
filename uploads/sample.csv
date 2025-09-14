@@ -1,0 +1,6 @@
+user_id,age_group,gender,city,hashed_email,event_type,timestamp
+U001,18-24,Female,Banglaore,a92f1e3b4c9d,login,2025-09-14 9:15:32
+U002,25-34,Male,Hyderabad,c18e7a2f5d4a,page_view,2025-09-14 9:18:47
+U003,35-44,Female,Chennai,b39d8c7a1f8e,add_to_cart,2025-09-14 9:21:05
+U004,18-24,Male,Delhi,d29f7b5a6e1c,purchase,2025-09-14 9:30:12
+U005,25-24,Other,Mumbai,e83a4f6d2b7c,logout,2025-09-14 9:35:22
